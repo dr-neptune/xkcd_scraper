@@ -1,0 +1,33 @@
+---
+title: "Scraper"
+author: "Michael Rose"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(furrr)
+library(purrr)
+library(curl)
+library(jsonlite)
+```
+
+```{r}
+# set furrr multiprocessing
+plan(multiprocess)
+```
+
+```{r}
+# create grabber mapper
+grabber_mapper <- as_mapper(function(i){
+  if (i == 1608) {
+   next 
+  }
+  
+  xkcd <- fromJSON(paste0("http://xkcd.com/", i, "/info.0.json"))
+  download.file(url = xkcd$img, destfile = paste0("~/Desktop/courses/GANs/xkcd/", i, stringr::str_sub(xkcd$img, -4)))
+})
+
+future_map(1:2135, ~ grabber_mapper(.x) %>% possibly(otherwise = "404 error"))
+```
+
